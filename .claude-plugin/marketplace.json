@@ -1,0 +1,13 @@
+{
+  "name": "cgn-brain-qa-marketplace",
+  "owner": {
+    "name": "CGN / E2M"
+  },
+  "plugins": [
+    {
+      "name": "cgn-brain-qa",
+      "source": "./",
+      "description": "CGN Brain health QA: scheduled sweeps and on-demand issue reporting to Slack and monday.com (skills: qa-sweep, report-issue)."
+    }
+  ]
+}
