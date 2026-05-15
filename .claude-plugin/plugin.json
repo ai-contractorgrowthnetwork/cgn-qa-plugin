@@ -1,0 +1,8 @@
+{
+  "name": "cgn-brain-qa",
+  "description": "CGN Brain health QA: scheduled sweeps and on-demand issue reporting to Slack and monday.com (skills: qa-sweep, report-issue).",
+  "version": "1.0.0",
+  "author": {
+    "name": "CGN / E2M"
+  }
+}
