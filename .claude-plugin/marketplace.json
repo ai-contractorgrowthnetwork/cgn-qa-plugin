@@ -5,9 +5,9 @@
   },
   "plugins": [
     {
-      "name": "cgn-brain-qa",
+      "name": "cgn-brain-qa-dev",
       "source": "./",
-      "description": "CGN Brain health QA: scheduled sweeps and on-demand issue reporting to Slack and monday.com (skills: qa-sweep, report-issue)."
+      "description": "CGN Brain health QA (DEV Sandbox): scheduled sweeps and on-demand issue reporting to monday.com (skills: qa-sweep, report-issue)."
     }
   ]
 }
