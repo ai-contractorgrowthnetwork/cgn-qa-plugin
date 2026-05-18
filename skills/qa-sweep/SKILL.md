@@ -1,7 +1,7 @@
 
 ---
 name: qa-sweep
-description: Scans the user's Slack, session transcripts, and the CGN client brain itself for brain-related issues (auth failures, duplicate clients, factual inaccuracies, conflicts, retrieval gaps, etc.) and aggregates findings to a central Slack channel and monday board. Use when the user says "run cgn brain qa", "sweep the cgn brain", "check cgn brain health", "cgn brain audit", "run a brain sweep", or when invoked automatically by the scheduled-tasks MCP on its 2-day cadence.
+description: Scans the user's session transcripts and the CGN client brain itself for brain-related issues (auth failures, duplicate clients, factual inaccuracies, conflicts, retrieval gaps, etc.) and aggregates findings to a central monday board. Use when the user says "run cgn brain qa", "sweep the cgn brain", "check cgn brain health", "cgn brain audit", "run a brain sweep", or when invoked automatically by the scheduled-tasks MCP on its 2-day cadence.
 ---
 
 # CGN Brain QA Sweep
@@ -10,7 +10,6 @@ You are running a structured QA pass over the CGN client brain to surface issues
 
 ## Destinations (fixed)
 
-- **Slack:** `#e2m-and-cgn` (channel ID `C0ADRFD1S59`)
 - **monday board:** "CGN Brain Issues- testE2M" (board ID `18413317001`) — if it doesn't exist yet, create it on first run using the schema in `references/monday-board-schema.md`
 
 ## Preflight (run on every invocation)
@@ -27,13 +26,7 @@ Run these in order. Each detection step maps to category codes in `references/ta
 
 Read `references/active-probes.md` and run every probe. Each probe is a specific MCP call with an expected-vs-actual check. Probes cover categories **A** and **B**.
 
-### Step 2 — Passive Slack scan
-
-Read `references/slack-patterns.md` for the keyword set and channel scope. Search the channels listed there over the last **N days** (default 7 on normal runs, 30 on the first run of a new installer). Focus on **C1, F2, F3**.
-
-**Scope:** exactly these 10 internal CGN channels — `#general`, `#internal-marketing`, `#ai-tools`, `#sales`, `#client-success`, `#seo`, `#webdev`, `#tide-pod`, `#naskr-pod`, `#e2m-and-cgn`. **Do NOT scan DMs**, client-specific channels, or notification/log channels. `#e2m-and-cgn` is both scanned AND used as the digest destination. If new internal channels are created, add them to `references/slack-patterns.md`.
-
-### Step 3 — Session transcript scan
+### Step 2 — Session transcript scan
 
 Read `references/transcript-patterns.md`. Enumerate recent sessions via `session_info.list_sessions`, then read transcripts looking for:
 
@@ -42,11 +35,11 @@ Read `references/transcript-patterns.md`. Enumerate recent sessions via `session
 - **Brain self-flagged conflicts in assistant responses** → **C2** (highest-value signal — the brain already calls these out in conversation; harvest them)
 - `[UNKNOWN - NEEDS CLIENT INPUT]` tokens in generated docs → **D1**
 
-### Step 4 — Canary queries (optional, run once per week max)
+### Step 3 — Canary queries (optional, run once per week max)
 
 Read `references/canary-queries.md`. Run a small set of known-answer questions per client and compare against expected answers. Catches **C3, C6, C7, E3**. Skip this step if the last canary run was within 7 days — find the last run timestamp in the monday board metadata.
 
-### Step 5 — Active SEO clients roster diff (monday Client Database)
+### Step 4 — Active SEO clients roster diff (monday Client Database)
 
 Source of truth for "active SEO client" is the monday **Client Database** board (board ID `18245097205`), group **Active Clients** (group id `topics`), filtered to items whose **Services Purchased** dropdown contains "SEO".
 
@@ -59,7 +52,7 @@ Diff that list against `list_clients` from the CGN brain, applying the rules in 
 
 HubSpot is no longer the source of truth for this diff and should not be used.
 
-### Step 6 — Manual item triage
+### Step 5 — Manual item triage
 
 Read `references/manual-item-triage.md`. Scan the CGN Brain Issues- testE2M board for top-level items added by teammates outside the sweep (no Category, Severity, Owner, or Dedup Key set) and route each one into the proper category parent + subitem structure. Each manual report gets a real category code, severity, owner, dedup key, and is filed under (or as) the appropriate parent — then the loose top-level item is deleted.
 
@@ -71,26 +64,6 @@ For every detected issue, follow the dedup logic in `references/dedup-logic.md` 
 
 Use the field schema in `references/monday-board-schema.md` for every new item. Group related occurrences as **subitems** under a single parent (issue type), not as flat items — see the schema doc for the parent/subitem pattern.
 
-## Digest to Slack
-
-After the sweep completes, post a single threaded digest to `#e2m-and-cgn` following the template in `references/slack-digest-format.md`. Include:
-
-- System-status line (✅/⚠️/❌ + one-line summary)
-- New issues this run (count + brief list with links to monday items)
-- **Auto-triaged manual reports (Step 6)** — count + brief list of `original title → reclassified as [code] under {parent}`
-- Re-affirmed open issues (count only, not each one)
-- Resolved-since-last-run (if any moved to Done in monday)
-
-**Do not post the digest if the sweep found nothing new and nothing changed.** Silence is fine — the goal is signal, not noise.
-
-## Severity rules
-
-Use the severity heuristic in `references/taxonomy.md`:
-
-- **High**: A1, A2, A5, B3, B4, B6, B7, C1, C2, C3, C5, C6
-- **Medium**: A3, A4, A6, B1, B2, B5, C4, C7, D1, D2, D3, E1, E2, E3
-- **Low**: F1, F2, F3
-
 ## Reporting back to the user in-session
 
-After the sweep, summarize to the user in plain language: what you checked, what you found, and a link to the monday board. Keep it short — the full detail lives in monday. If this was a scheduled-task invocation (no interactive user), skip the in-session summary and just post the Slack digest.
+After the sweep, summarize to the user in plain language: what you checked, what you found, and a link to the monday board. Keep it short — the full detail lives in monday. If this was a scheduled-task invocation (no interactive user), skip the in-session summary.
